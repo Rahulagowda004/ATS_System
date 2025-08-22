@@ -10,10 +10,6 @@ def load_api_key():
             return f.read().strip()
     return ""
 
-def save_api_key(key: str):
-    with open(API_KEY_FILE, "w") as f:
-        f.write(key)
-
 def main():
     st.set_page_config(
         page_title="Resume ATS",
@@ -55,9 +51,6 @@ def main():
             help="Your API key for processing resumes",
             key="api_key"  # Remove value=st.session_state.api_key
         )
-        # Save API key if changed
-        if st.session_state.api_key and st.session_state.api_key != load_api_key():
-            save_api_key(st.session_state.api_key)
 
         if api_key:
             st.success("✅ API key configured")
