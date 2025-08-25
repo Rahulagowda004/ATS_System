@@ -1,85 +1,66 @@
-# ATS_System
+# ATS System
 
-ATS_System is an Applicant Tracking System designed to streamline the hiring process for organizations. It helps manage job postings, candidate applications, and recruitment workflows efficiently.
+## Overview
+
+ATS System is an AI-powered Resume Evaluation and Applicant Tracking System (ATS) designed for legal, IP, and startup-facing roles. It uses advanced scoring rubrics and integrates with Azure OpenAI to automate resume screening, scoring, and recommendations.
 
 ## Features
 
-- **Job Posting Management**: Create, update, and delete job openings.
-- **Applicant Tracking**: View, update, and manage candidate applications.
-- **Recruitment Workflow**: Track candidates through various stages of the hiring process.
-- **User Roles**: Support for different user roles (Admin, Recruiter, Candidate).
-- **Automated Notifications**: Email alerts for application status changes.
-- **Search & Filter**: Powerful search and filtering options for jobs and candidates.
-- **Reporting & Analytics**: Insights into hiring metrics and trends.
+- Upload multiple resumes (PDF, DOC, DOCX) via a Streamlit web interface.
+- Automated scoring based on legal/IP/startup experience, skills, education, and cultural fit.
+- Uses Azure OpenAI for intelligent resume evaluation.
+- Generates detailed Excel reports with scores, recommendations, and justifications.
+- Secure API key management.
 
-## Technologies Used
-
-- **Backend**: (Specify e.g., Node.js, Python, Java, etc.)
-- **Frontend**: (Specify e.g., React, Angular, Vue, etc.)
-- **Database**: (Specify e.g., MySQL, MongoDB, PostgreSQL, etc.)
-- **Other**: (Any other frameworks, libraries, or tools)
-
-## Getting Started
+## HomePage
+![Homepage Screenshot](Images/homepage.png)
 
 ### Prerequisites
 
-- (List prerequisites, e.g., Node.js, Python, Docker, etc.)
-- (Database setup requirements)
+- Python 3.12+
+- Azure OpenAI API Key
+- All dependencies listed in `requirements.txt` or `pyproject.toml`
 
 ### Installation
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/Rahulagowda004/ATS_System.git
+   git clone https://github.com/ITCartofficial/ATS_System.git
    cd ATS_System
    ```
 
 2. Install dependencies:
    ```sh
-   # Example for Node.js
-   npm install
+   pip install -r requirements.txt
    ```
 
-3. Configure environment variables:
-   - Copy `.env.example` to `.env` and update the settings.
+3. Set your Azure OpenAI API key:
+   - Create a file named `.api_key` in the project root and paste your API key inside.
 
-4. Set up the database:
-   - (Instructions for migration/seeding, if applicable)
+### Usage
 
-5. Start the application:
+1. Start the Streamlit interface:
    ```sh
-   # Example for Node.js
-   npm start
+   streamlit run interface.py
    ```
 
-6. Access the application at [http://localhost:3000](http://localhost:3000) (or your configured port).
+2. Upload resume files and enter your API key in the sidebar.
 
-## Usage
+3. Click "Process Resumes" to generate the ATS report.
 
-- Register as a user (Recruiter/Candidate).
-- Admins can create and manage job postings.
-- Candidates can apply to jobs and track their applications.
-- Recruiters can view and manage candidate applications.
-- Use filters and search to find relevant jobs or candidates.
+4. Download the results as an Excel file.
 
-## Contributing
+## File Structure
 
-Contributions are welcome! Please open an issue or submit a pull request for improvements, bug fixes, or new features.
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+- `main.py`: Core logic for resume evaluation and scoring.
+- `interface.py`: Streamlit web interface for uploading and processing resumes.
+- `create_template.py`: Script to generate the Excel scoring template.
+- `template.xlsx`: Excel template for scoring.
+- `requirements.txt` / `pyproject.toml`: Python dependencies.
+- `LICENSE`: MIT License.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
-## Contact
-
-For questions, feel free to open an issue or reach out to [Rahulagowda004](https://github.com/Rahulagowda004).
+This project is licensed under the MIT License.
 
 ---
-
-*ATS_System aims to make recruitment simple and effective for organizations of all sizes.*
