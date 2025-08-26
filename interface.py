@@ -53,6 +53,11 @@ def main():
         4. Click process
         5. Download results
         """)
+        
+        st.divider()
+        
+        st.subheader("💡 Optimization")
+        st.info("This system extracts job requirements once and reuses them for all resumes, saving tokens and reducing costs!")
 
     # File uploads in two columns
     col1, col2 = st.columns(2)
@@ -102,52 +107,82 @@ def main():
         st.info(f"Please provide: {', '.join(missing)}")
 
 def process_resumes(api_key, job_description_file, resume_files):
-    """Process the uploaded resumes"""
+    """Process the uploaded resumes with optimized token usage"""
     
-    with st.spinner("Processing resumes... Please wait."):
-        try:
-            # Create temporary directories
-            with tempfile.TemporaryDirectory() as temp_dir:
-                resume_dir = os.path.join(temp_dir, "resumes")
-                os.makedirs(resume_dir, exist_ok=True)
-                
-                # Save job description
-                job_desc_path = os.path.join(temp_dir, f"job_description.{job_description_file.name.split('.')[-1]}")
-                with open(job_desc_path, "wb") as f:
-                    f.write(job_description_file.getbuffer())
+    progress_container = st.container()
+    
+    with progress_container:
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+    
+    try:
+        status_text.info("🔄 Setting up processing...")
+        progress_bar.progress(10)
+        
+        # Create temporary directories
+        with tempfile.TemporaryDirectory() as temp_dir:
+            resume_dir = os.path.join(temp_dir, "resumes")
+            os.makedirs(resume_dir, exist_ok=True)
+            
+            status_text.info("💾 Saving files...")
+            progress_bar.progress(20)
+            
+            # Save job description
+            job_desc_path = os.path.join(temp_dir, f"job_description.{job_description_file.name.split('.')[-1]}")
+            with open(job_desc_path, "wb") as f:
+                f.write(job_description_file.getbuffer())
 
-                # Save resume files
-                for resume_file in resume_files:
-                    file_path = os.path.join(resume_dir, resume_file.name)
-                    with open(file_path, "wb") as f:
-                        f.write(resume_file.getbuffer())
+            # Save resume files
+            for resume_file in resume_files:
+                file_path = os.path.join(resume_dir, resume_file.name)
+                with open(file_path, "wb") as f:
+                    f.write(resume_file.getbuffer())
 
-                # Process resumes
-                evaluator = ResumeEvaluator(api_key=api_key)
-                output_path = os.path.join(temp_dir, "evaluation_results.xlsx")
-                result_df = evaluator.process_folder(
-                    folder_path=resume_dir,
-                    job_description_path=job_desc_path,
-                    output_path=output_path
-                )
-                
-                # Read Excel file for download
-                with open(output_path, "rb") as f:
-                    excel_data = f.read()
-                
-                # Store in session state
-                st.session_state.results = {
-                    'dataframe': result_df,
-                    'excel_data': excel_data
-                }
-                
-                st.rerun()
-                
-        except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            status_text.info("🧠 Analyzing job requirements...")
+            progress_bar.progress(40)
+            
+            # Process resumes with optimized approach
+            evaluator = ResumeEvaluator(api_key=api_key)
+            
+            status_text.info("🤖 Evaluating resumes...")
+            progress_bar.progress(60)
+            
+            output_path = os.path.join(temp_dir, "evaluation_results.xlsx")
+            result_df = evaluator.process_folder(
+                folder_path=resume_dir,
+                job_description_path=job_desc_path,
+                output_path=output_path
+            )
+            
+            status_text.info("📊 Preparing results...")
+            progress_bar.progress(90)
+            
+            # Read Excel file for download
+            with open(output_path, "rb") as f:
+                excel_data = f.read()
+            
+            # Store in session state
+            st.session_state.results = {
+                'dataframe': result_df,
+                'excel_data': excel_data
+            }
+            
+            progress_bar.progress(100)
+            status_text.success("✅ Processing complete!")
+            
+            # Clear progress after a moment
+            import time
+            time.sleep(1)
+            progress_container.empty()
+            
+            st.rerun()
+            
+    except Exception as e:
+        st.error(f"❌ Error: {str(e)}")
+        progress_container.empty()
 
 def display_simple_results():
-    """Display results in a very simple format"""
+    """Display results in a simple format"""
     if 'results' not in st.session_state:
         return
         
@@ -172,12 +207,37 @@ def display_simple_results():
         st.metric("Good", recommended)
     
     with col4:
-        avg_score = result_df['Skills Score'].mean() if 'Skills Score' in result_df.columns else 0
-        st.metric("Avg Score", f"{avg_score:.0f}")
+        # Calculate average of both scores
+        exp_score = result_df['Experience Score'].mean() if 'Experience Score' in result_df.columns else 0
+        skills_score = result_df['Skills Score'].mean() if 'Skills Score' in result_df.columns else 0
+        avg_score = (exp_score + skills_score) / 2
+        st.metric("Avg Score", f"{avg_score:.1f}/10")
     
-    # Simple table
+    # Simple table with better column configuration
     st.subheader("Detailed Results")
-    st.dataframe(result_df, use_container_width=True, hide_index=True)
+    
+    # Configure columns for better display
+    column_config = {
+        "Experience Score": st.column_config.ProgressColumn(
+            "Experience Score",
+            help="Experience match score out of 10",
+            min_value=0,
+            max_value=10,
+        ),
+        "Skills Score": st.column_config.ProgressColumn(
+            "Skills Score", 
+            help="Skills match score out of 10",
+            min_value=0,
+            max_value=10,
+        )
+    }
+    
+    st.dataframe(
+        result_df, 
+        use_container_width=True, 
+        hide_index=True,
+        column_config=column_config
+    )
     
     # Download button
     st.subheader("Download")
